@@ -24,7 +24,7 @@ function SelectOption({ selectedStudyType, defaultSelected }) {
         },
         {
             name: 'Other',
-            icon: '/knowledge.png'
+            icon: '/knowledge.jpg'
         },
 
     ]

@@ -51,16 +51,18 @@ export async function POST(req) {
           flashcard: "Pending",
         },
         isNewCourse: true,
+        readyCount: 1,
+        totalPossible: 4,
       });
     }
 
     // For existing courses, check actual status
-    // Initialize status object
+    // Initialize status object with all items as "NotCreated" by default
     const status = {
-      notes: "Pending",
-      quiz: "Pending",
-      qa: "Pending",
-      flashcard: "Pending",
+      notes: "NotCreated",
+      quiz: "NotCreated",
+      qa: "NotCreated",
+      flashcard: "NotCreated",
     };
 
     // Check notes status
@@ -73,49 +75,54 @@ export async function POST(req) {
       status.notes = "Ready";
     }
 
-    // Check quiz status
-    const quizResult = await db
+    // FIX: Get ALL content records for this course to count correctly
+    const allContentRecords = await db
       .select()
       .from(STUDY_TYPE_CONTENT_TABLE)
-      .where(eq(STUDY_TYPE_CONTENT_TABLE.courseId, courseId))
-      .where(eq(STUDY_TYPE_CONTENT_TABLE.type, "Quiz"));
+      .where(eq(STUDY_TYPE_CONTENT_TABLE.courseId, courseId));
 
-    if (
-      quizResult &&
-      quizResult.length > 0 &&
-      quizResult[0].status === "Ready"
-    ) {
-      status.quiz = "Ready";
+    console.log(
+      `Found ${allContentRecords.length} content records for course ${courseId}`
+    );
+
+    // Check each study type individually
+    for (const record of allContentRecords) {
+      const type = record.type;
+      const recordStatus = record.status;
+
+      console.log(`Found record of type ${type} with status ${recordStatus}`);
+
+      // Map the database type to our status object property
+      if (type === "Quiz") {
+        status.quiz = recordStatus;
+      } else if (type === "Question/Answer") {
+        status.qa = recordStatus;
+      } else if (type === "Flashcard") {
+        status.flashcard = recordStatus;
+      }
     }
 
-    // Check Q&A status
-    const qaResult = await db
-      .select()
-      .from(STUDY_TYPE_CONTENT_TABLE)
-      .where(eq(STUDY_TYPE_CONTENT_TABLE.courseId, courseId))
-      .where(eq(STUDY_TYPE_CONTENT_TABLE.type, "Question/Answer"));
+    // Calculate ready count - ONLY count 'Ready' status items
+    const readyCount = Object.values(status).filter(
+      (val) => val === "Ready"
+    ).length;
 
-    if (qaResult && qaResult.length > 0 && qaResult[0].status === "Ready") {
-      status.qa = "Ready";
-    }
-
-    // Check flashcard status
-    const flashcardResult = await db
-      .select()
-      .from(STUDY_TYPE_CONTENT_TABLE)
-      .where(eq(STUDY_TYPE_CONTENT_TABLE.courseId, courseId))
-      .where(eq(STUDY_TYPE_CONTENT_TABLE.type, "Flashcard"));
-
-    if (
-      flashcardResult &&
-      flashcardResult.length > 0 &&
-      flashcardResult[0].status === "Ready"
-    ) {
-      status.flashcard = "Ready";
-    }
+    // Count items that exist (not "NotCreated")
+    const existingItems = Object.values(status).filter(
+      (val) => val !== "NotCreated"
+    ).length;
 
     console.log("Material status:", status);
-    return NextResponse.json({ status, isNewCourse: false });
+    console.log(`Ready count: ${readyCount} / 4`);
+    console.log(`Existing items: ${existingItems}`);
+
+    return NextResponse.json({
+      status,
+      isNewCourse: false,
+      readyCount,
+      totalPossible: 4,
+      existingItemsCount: existingItems, // Add this to track existing items
+    });
   } catch (error) {
     console.error("Error checking progress:", error);
     return NextResponse.json(

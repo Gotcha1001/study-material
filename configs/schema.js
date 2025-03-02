@@ -5,6 +5,7 @@ import {
   pgTable,
   serial,
   text,
+  timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -26,6 +27,7 @@ export const STUDY_MATERIAL_TABLE = pgTable("studyMaterial", {
   courseLayout: json(),
   createdBy: varchar().notNull(),
   status: varchar().default("Generating"),
+  createdAt: timestamp().defaultNow(), // Add this line
 });
 
 export const CHAPTER_NOTES_TABLE = pgTable("chapterNotes", {
@@ -42,11 +44,3 @@ export const STUDY_TYPE_CONTENT_TABLE = pgTable("studyTypeContent", {
   type: varchar().notNull(),
   status: varchar().default("Generating"),
 });
-
-// export const QUESTIONS_ANSWERS_TABLE = pgTable("questionsAnswers", {
-//   id: serial().primaryKey(),
-//   courseId: varchar().notNull(), // Links Q&A to a specific course
-//   content: json().notNull(), // Stores Q&A content in JSON format
-//   type: varchar().notNull().default("QA"), // Type identifier for structuring
-//   status: varchar().default("Generating"), // Status: Generating or Ready
-// });

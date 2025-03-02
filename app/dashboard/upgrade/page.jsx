@@ -86,7 +86,7 @@ function BuyCredits() {
             <h2 className="font-bold text-4xl gradient-title text-center">
                 Buy More Credits
             </h2>
-            <p className="text-center mt-5 font-medium text-white text-s border border-indigo-500 gradient-background2 p-2 rounded-lg">
+            <p className="text-center mt-5 font-medium text-white text-s border border-indigo-700 bg-gradient-to-r from-purple-700 via-black to-indigo-500 p-10 rounded-lg mx-auto max-w-2xl lg:max-w-xl">
                 Unlock Endless Possibilities: <br /> 1 Credit = 1 Course.<br /> Buy More
                 Credits And Create Amazing AI Courses Today!
             </p>
@@ -102,8 +102,8 @@ function BuyCredits() {
                     return (
                         <div
                             key={index}
-                            className={`flex flex-col gap-2 justify-center items-center p-6 border rounded-lg shadow-sm hover:shadow-md transition-all ${selectedOption?.credits === item.credits
-                                ? "border-indigo-600 bg-indigo-50"
+                            className={`flex flex-col gap-2 justify-center items-center p-6 border border-indigo-500 rounded-lg shadow-sm hover:shadow-md transition-all ${selectedOption?.credits === item.credits
+                                ? "border-indigo-600 bg-gradient-to-r from-red-500 via-yellow-300 t0-white"
                                 : "border-gray-200"
                                 }`}
                         >

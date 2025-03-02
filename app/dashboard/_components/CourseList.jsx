@@ -42,12 +42,15 @@ function CourseList() {
 
     return (
         <div className='mt-10'>
-            <h2 className='font-bold gradient-title text-3xl text-center mb-5 flex justify-between items-center'>Your Study Material
+            <h2 className='font-bold gradient-title text-3xl mb-5 flex items-center'>
+                <div className="flex-grow text-center">Your Study Material</div>
                 <Button
                     onClick={GetCourseList}
-                    variant="sex1" className="border-primary text-primary"><RefreshCcw />
+                    variant="sex1"
+                    className="border-primary text-primary"
+                >
+                    <RefreshCcw size={16} />
                 </Button>
-
             </h2>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-2'>
                 {loading == false ? courseList?.map((course, index) => (

@@ -12,7 +12,17 @@ function DashboardLayout({ children }) {
         // <CourseCountContext.Provider value={{ totalCourse, setTotalCourse }}>
         <div>
             <div className='md:w-64 hidden md:block fixed'>
-                <SideBar />
+                <MotionWrapperDelay
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{ duration: 0.9, delay: 0.3 }}
+                    variants={{
+                        hidden: { opacity: 0, y: 50 },
+                        visible: { opacity: 1, y: 0 },
+                    }}
+                > <SideBar /></MotionWrapperDelay>
+
             </div>
             <div className='md:ml-64'>
                 <MotionWrapperDelay

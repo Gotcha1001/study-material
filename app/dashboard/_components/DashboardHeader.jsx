@@ -64,8 +64,14 @@ export default function DashboardHeader() {
                     >
                         Dashboard
                     </Link>
+
                 </div>
-                <UserButton appearance={{ elements: { avatarBox: "w-16 h-16" } }} />
+                <div className="flex items-center gap-6"> {/* Increased gap from 3 to 6 */}
+                    <Link href={'/create'}>
+                        <Button className="w-full" variant="sex2">+Create New</Button>
+                    </Link>
+                    <UserButton appearance={{ elements: { avatarBox: "w-16 h-16" } }} />
+                </div>
 
             </div>
 
@@ -93,7 +99,7 @@ export default function DashboardHeader() {
                         </div>
 
                         <Link href={'/create'}>
-                            <Button className="w-full" variant="sex2">+Create New</Button>
+                            <Button className="w-full mb-3" variant="sex2">+Create New</Button>
                         </Link>
 
                         <nav className="flex flex-col gap-2">
@@ -117,7 +123,7 @@ export default function DashboardHeader() {
                             ))}
                         </nav>
 
-                        <div className='text-teal-100 text-center border border-indigo-500 rounded-lg p-1 mt-10'>
+                        <div className='text-teal-100 text-center border border-indigo-500 rounded-lg p-1 mt-10 bg-gradient-to-r from-purple-900 via-indigo-800 to-black w-[90%]'>
                             <h2 className='text-lg mb-2'>Available Credits:</h2>
                             <Progress value={remainingCredits * 10} />
                             <h2 className='text-sm text-center mt-1'>{remainingCredits} Credits Left</h2>

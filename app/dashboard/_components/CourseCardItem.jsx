@@ -6,7 +6,7 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 
-function CourseCardItem({ course }) {
+export default function CourseCardItem({ course }) {
     const [progress, setProgress] = useState(0);
     const [materialStatus, setMaterialStatus] = useState({
         notes: false,
@@ -14,7 +14,35 @@ function CourseCardItem({ course }) {
         qa: false,
         flashcard: false
     });
-    const [availableItems, setAvailableItems] = useState(1); // Default to 1 (for notes)
+    const [statusData, setStatusData] = useState({});
+    const [isNewCourse, setIsNewCourse] = useState(false);
+    const [existingItemsCount, setExistingItemsCount] = useState(0); // Track items that exist
+    const [completedCount, setCompletedCount] = useState(0);
+    const [totalPossibleItems, setTotalPossibleItems] = useState(4); // Total possible items (notes, quiz, qa, flashcard)
+
+    const logProgressDetails = (status, isNewCourseFlag) => {
+        // Log raw status values from API
+        console.log("CourseCardItem - RAW STATUS VALUES:", {
+            notes: status.notes,
+            quiz: status.quiz,
+            qa: status.qa,
+            flashcard: status.flashcard
+        });
+
+        // Calculate how many are "Ready"
+        const readyItems = Object.entries(status).filter(([key, value]) => {
+            console.log(`CourseCardItem - Status of ${key}:`, value);
+            return value === 'Ready';
+        });
+
+        // Calculate how many are in progress (not "NotCreated")
+        const inProgressItems = Object.entries(status).filter(([key, value]) => {
+            return value !== "NotCreated";
+        });
+
+        console.log("CourseCardItem - Items marked as Ready:", readyItems.map(([key]) => key));
+        console.log("CourseCardItem - In-progress items:", inProgressItems.map(([key]) => key));
+    };
 
     useEffect(() => {
         if (course?.courseId) {
@@ -29,7 +57,15 @@ function CourseCardItem({ course }) {
                 courseId: course?.courseId
             });
 
+            // Log the raw API response
+            console.log("CourseCardItem - API response:", result.data);
+
             const status = result.data.status || {};
+            setStatusData(status);
+            setIsNewCourse(result.data.isNewCourse || false);
+
+            // Run detailed debug logging
+            logProgressDetails(status, result.data.isNewCourse);
 
             setMaterialStatus({
                 notes: status.notes === 'Ready',
@@ -38,45 +74,62 @@ function CourseCardItem({ course }) {
                 flashcard: status.flashcard === 'Ready'
             });
 
-            // Count items that are either Ready, Generating, or Pending (but not NotCreated)
-            const availableCount = Object.values(status)
+            // Count items that are either Ready or in progress (Generating/Pending) - but not NotCreated
+            const inProgressCount = Object.values(status)
                 .filter(itemStatus => itemStatus !== "NotCreated").length;
 
-            setAvailableItems(availableCount > 0 ? availableCount : 1);
-
-            // Calculate progress percentage based on available items
-            const completedCount = Object.values(status)
+            const readyCount = Object.values(status)
                 .filter(itemStatus => itemStatus === 'Ready').length;
 
-            // If nothing is available yet, default to notes only (25% if notes are ready)
-            const progressPercentage = availableCount > 0
-                ? (completedCount / availableCount) * 100
-                : (status.notes === 'Ready' ? 25 : 0);
+            // Use the existingItemsCount from API if available
+            setExistingItemsCount(result.data.existingItemsCount || inProgressCount);
+            setCompletedCount(readyCount);
 
-            setProgress(progressPercentage);
+            // Calculate progress
+            let progressValue;
+            if (result.data.isNewCourse) {
+                // For new courses, fix at 25%
+                progressValue = 25;
+                console.log("CourseCardItem - New course: setting progress to 25%");
+            } else if (inProgressCount === 0) {
+                // No items in progress
+                progressValue = 0;
+            } else {
+                // Calculate based on ready items versus TOTAL POSSIBLE items (always 4)
+                progressValue = (readyCount / totalPossibleItems) * 100;
+                console.log(`CourseCardItem - Fixed progress calculation: ${readyCount} completed / ${totalPossibleItems} total possible = ${progressValue}%`);
+            }
+
+            setProgress(progressValue);
         } catch (error) {
             console.error("Error checking material status:", error);
         }
     };
 
     return (
-        <div className='border border-teal-500 rounded-lg p-5 shadow-lg'>
+        <div className='border border-teal-500 gradient-background2 rounded-lg p-5 shadow-lg hover:scale-105 transition-all hover:bg-gradient-to-r from-red-500 via-yellow-300 t0-white'>
             <div>
                 <div className='flex justify-between items-center'>
-                    <Image src={'/knowledge.jpg'} alt='Icon' height={70} width={70} className='rounded-xl' />
-                    <h2 className='text-[10px] p-1 text-xs px-2 rounded-full text-white bg-primary'>20 Dec 2025</h2>
+                    <Image src={'/knowledge.jpg'} alt='Icon' height={90} width={90} className='rounded-xl' />
+                    <h2 className='text-[10px] p-1 text-xs px-2 rounded-full text-white bg-primary'>
+                        {course?.createdAt
+                            ? new Date(course.createdAt).toLocaleDateString('en-US', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                            })
+                            : 'New Course'}
+                    </h2>
                 </div>
                 <h2 className='mt-3 text-indigo-400 font-medium text-lg'>{course?.courseLayout?.courseTitle}</h2>
                 <p className='text-sm line-clamp-2 text-primary mt-2'>{course?.courseLayout?.courseSummary}</p>
-
                 <div className='mt-3'>
                     <Progress value={progress} />
                     <div className='mt-1 flex justify-between text-xs text-primary'>
                         <span>{Math.round(progress)}% Complete</span>
-                        <span>{Object.values(materialStatus).filter(Boolean).length}/{availableItems} Materials</span>
+                        <span>{completedCount}/{totalPossibleItems} Materials</span>
                     </div>
                 </div>
-
                 <div className='mt-3 flex justify-between items-center'>
                     <div className='flex gap-1'>
                         <span className={`w-2 h-2 rounded-full ${materialStatus.notes ? 'bg-green-500' : 'bg-gray-300'}`} title="Notes"></span>
@@ -84,7 +137,6 @@ function CourseCardItem({ course }) {
                         <span className={`w-2 h-2 rounded-full ${materialStatus.qa ? 'bg-green-500' : 'bg-gray-300'}`} title="Q&A"></span>
                         <span className={`w-2 h-2 rounded-full ${materialStatus.flashcard ? 'bg-green-500' : 'bg-gray-300'}`} title="Flashcards"></span>
                     </div>
-
                     {course?.status == 'Generating' ?
                         <h2 className='text-primary text-sm p-1 px-2 rounded-full bg-gradient-to-r zoom from-indigo-500 via-white to-black flex justify-between items-center gap-2'>
                             <RefreshCwIcon className='animate-spin h-5 w-5' />
@@ -99,5 +151,3 @@ function CourseCardItem({ course }) {
         </div>
     )
 }
-
-export default CourseCardItem

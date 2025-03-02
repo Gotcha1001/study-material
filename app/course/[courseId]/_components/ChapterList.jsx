@@ -11,10 +11,10 @@ function ChapterList({ course }) {
             <div className='mt-3'>
                 {CHAPTERS?.map((chapter, index) => (
                     <FeatureMotionWrapper key={index} index={index}>
-                        <div className='flex gap-5 items-center p-4 border border-teal-500 cursor-pointer  rounded-lg mb-2 '>
-                            <h2 className='text-2xl'>{chapter?.emoji}</h2>
+                        <div className='flex gap-5 items-center p-4 border  border-teal-500 cursor-pointer  rounded-lg mb-2 hover:hover:bg-gradient-to-r from-red-500 via-yellow-300'>
+                            <h2 className='text-2xl '>{chapter?.emoji}</h2>
                             <div>
-                                <h2 className='text-purple-400 font-bold text-xl'>{chapter?.chapterTitle}</h2>
+                                <h2 className='text-purple-400  font-bold text-xl '>{chapter?.chapterTitle}</h2>
                                 <p className='text-white text-sm'>{chapter?.chapterSummary}</p>
                             </div>
                         </div>

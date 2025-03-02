@@ -68,7 +68,7 @@ function MaterialCardItem({ item, studyTypeContent, course, refreshData }) {
     }
 
     return (
-        <div className={`border border-teal-500 p-5 rounded-lg flex flex-col items-center ${!contentExists ? 'grayscale' : ''}`}>
+        <div className={`border border-teal-500 hover:bg-gradient-to-r from-red-500 via-yellow-300 t0-white p-5 rounded-lg flex flex-col items-center ${!contentExists ? 'grayscale' : ''}`}>
             {!contentExists
                 ? <h2 className='text-white bg-gray-500 rounded-lg p-1 px-2 mb-2 bg-gradient-to-r text-[10px] from-indigo-600 via-teal-500 to-black'>GENERATE</h2>
                 : <h2 className='text-white rounded-lg p-1 px-2 mb-2 bg-gradient-to-r text-[10px] from-indigo-600 via-teal-500 to-black'>READY</h2>}

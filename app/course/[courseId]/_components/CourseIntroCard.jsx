@@ -126,7 +126,7 @@ export default function CourseIntroCard({ course }) {
     }
 
     return (
-        <div className='flex flex-col md:flex-row gap-5 p-4 border border-teal-500 rounded-lg'>
+        <div className='flex flex-col md:flex-row gap-5 p-4 border gradient-background2 border-teal-500 rounded-lg'>
             <div className="flex justify-center">
                 <Image
                     className='rounded-lg object-cover md:w-48 md:h-44'

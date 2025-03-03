@@ -1,12 +1,19 @@
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { RefreshCcw, RefreshCwIcon } from 'lucide-react'
+import { RefreshCcw, RefreshCwIcon, MoreVertical, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { toast } from 'sonner'
 
-export default function CourseCardItem({ course }) {
+export default function CourseCardItem({ course, onDelete }) {
     const [progress, setProgress] = useState(0);
     const [materialStatus, setMaterialStatus] = useState({
         notes: false,
@@ -77,7 +84,6 @@ export default function CourseCardItem({ course }) {
             // Count items that are either Ready or in progress (Generating/Pending) - but not NotCreated
             const inProgressCount = Object.values(status)
                 .filter(itemStatus => itemStatus !== "NotCreated").length;
-
             const readyCount = Object.values(status)
                 .filter(itemStatus => itemStatus === 'Ready').length;
 
@@ -106,8 +112,45 @@ export default function CourseCardItem({ course }) {
         }
     };
 
+    const handleDeleteCourse = async () => {
+        try {
+            if (confirm("Are you sure you want to delete this course? This action cannot be undone.")) {
+                const response = await axios.delete(`/api/courses-delete?courseId=${course.courseId}`);
+
+                if (response.data.success) {
+                    toast.success("Course deleted successfully");
+                    // Call the parent's onDelete function to refresh the course list
+                    if (onDelete) onDelete();
+                }
+            }
+        } catch (error) {
+            console.error("Error deleting course:", error);
+            toast.error("Failed to delete course");
+        }
+    };
+
     return (
-        <div className='border border-teal-500 gradient-background2 rounded-lg p-5 shadow-lg hover:scale-105 transition-all hover:bg-gradient-to-r from-red-500 via-yellow-300 t0-white'>
+        <div className='border border-teal-500 gradient-background2 rounded-lg p-5 shadow-lg hover:scale-105 transition-all hover:bg-gradient-to-r from-red-500 via-yellow-300 t0-white relative'>
+            {/* 3-dot menu in top-right corner */}
+            <div className="absolute top-2 right-2 z-10">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0" size="icon">
+                            <MoreVertical className="h-4 w-4 text-primary" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            className="text-red-500 focus:text-red-500 cursor-pointer flex items-center"
+                            onClick={handleDeleteCourse}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+
             <div>
                 <div className='flex justify-between items-center'>
                     <Image src={'/knowledge.jpg'} alt='Icon' height={90} width={90} className='rounded-xl' />

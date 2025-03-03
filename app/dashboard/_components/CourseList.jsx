@@ -1,4 +1,5 @@
 "use client"
+
 import { useEffect, useState, useContext } from 'react';
 import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
@@ -22,11 +23,9 @@ function CourseList() {
 
     const GetCourseList = async () => {
         setLoading(true);
-
         const result = await axios.post('/api/courses', {
             createdBy: user?.primaryEmailAddress.emailAddress
         });
-
         console.log("☘️:", result);
         setCourseList(result.data.result);
         setTotalCourses(result.data.result.length);
@@ -62,7 +61,10 @@ function CourseList() {
                 {loading == false ? paginatedCourses?.map((course, index) => (
                     <FeatureMotionWrapper key={index} index={index}>
                         <div>
-                            <CourseCardItem course={course} />
+                            <CourseCardItem
+                                course={course}
+                                onDelete={GetCourseList}
+                            />
                         </div>
                     </FeatureMotionWrapper>
                 ))
@@ -73,7 +75,6 @@ function CourseList() {
                     ))
                 }
             </div>
-
             {/* Pagination Controls */}
             <div className="flex justify-center gap-4 mt-5">
                 <Button variant="sex1"
